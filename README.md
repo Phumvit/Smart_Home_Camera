@@ -32,4 +32,7 @@ In Serial mode, the Arduino `.ino` file processes data received directly over a 
 
 This setup enables a flexible smart camera system that can detect, track, and interact with other devices through Home Assistant, using either MQTT or Serial communication.
 
+## Github Pages
+[https://phumvit.github.io/Mini-Project/index.html]
+
 ---
