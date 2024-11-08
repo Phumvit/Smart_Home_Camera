@@ -1,0 +1,100 @@
+esphome:
+  name: servo-online
+  platform: ESP32
+  board: nodemcu-32s    #esp32
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  ap:
+    ssid: !secret ap_ssid
+    password: !secret ap_password
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API integration
+api:
+
+# Enable Over-the-Air (OTA) updates
+ota:
+
+
+web_server:
+  port: 80
+
+# Servo configuration for both X-axis and Y-axis
+servo:
+  - id: servo_x  # Servo for X-axis
+    output: pwm_output_x
+  - id: servo_y  # Servo for Y-axis
+    output: pwm_output_y
+
+# Output configuration for controlling each servo
+output:
+  - platform: ledc
+    id: pwm_output_x
+    pin: GPIO27  # Pin for X-axis servo
+    frequency: 50 Hz
+  - platform: ledc
+    id: pwm_output_y
+    pin: GPIO26  # Pin for Y-axis servo
+    frequency: 50 Hz
+
+# MQTT settings to receive JSON message controlling both X and Y servos
+mqtt:
+  broker: !secret mqtt_broker
+  username: !secret mqtt_username
+  password: !secret mqtt_password
+  port: 1883
+  discovery: true
+
+  # MQTT subscription to control both X and Y axis with JSON
+  on_json_message:
+    topic: "servo/position"  # Subscribing to the topic "servo/position"
+    then:
+      - lambda: |-
+          if (x.containsKey("x") && x.containsKey("y")) {
+            float raw_position_x = x["x"].as<float>();
+            float raw_position_y = x["y"].as<float>();
+
+            float position_x = ( (raw_position_x / 180.0) * 200 - 100 ) * -1;
+            float position_y = ( (raw_position_y / 180.0) * 200 - 100 ) * -1;
+
+            id(servo_x).write(position_x / 100);
+            id(servo_y).write(position_y / 100);
+            
+          } else {
+            ESP_LOGW("main", "Invalid JSON format: 'x' or 'y' key not found");
+          }
+
+# Home Assistant sliders to control both X and Y axis
+number:
+  - platform: template
+    name: "Servo X Position"
+    id: servo_x_slider
+    min_value: 0
+    max_value: 180
+    step: 1
+    optimistic: true
+    set_action:
+      then:
+        - lambda: |-
+            float position_x = (x / 180) * 200 - 100;
+            // id(servo_x).write((position_x / 180) * 200 - 100);
+            id(servo_x).write(position_x / 100);
+
+  - platform: template
+    name: "Servo Y Position"
+    id: servo_y_slider
+    min_value: 0
+    max_value: 180
+    step: 1
+    optimistic: true
+    set_action:
+      then:
+        - lambda: |-
+            float position_y = (x / 180) * 200 - 100;
+            // id(servo_x).write((position_x / 180) * 200 - 100);
+            id(servo_y).write(position_y / 100);

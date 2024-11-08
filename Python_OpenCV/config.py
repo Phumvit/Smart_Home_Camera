@@ -1,0 +1,8 @@
+# Configurations for home assistant api
+HA_URL = 'YOUR HOME ASSISTANT API URL'
+HA_ACCESS_TOKEN = 'YOUR HOME ASSISTANT TOKEN'
+HA_CAMERA_ENTITY_ID = 'YOUR CAMERA ENTITY'
+
+# Configurations for mqtt user and password
+MQTT_USERNAME = 'YOUR MQTT USER'  
+MQTT_PASSWORD = 'YOUR MQTT PASSWORD'
